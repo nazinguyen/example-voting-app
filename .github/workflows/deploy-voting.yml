@@ -29,12 +29,15 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
+         set -e # <-- QUAN TRỌNG: Gặp lỗi thì dừng ngay
+        
           cd "/root/example-voting-app"
 
-          echo " Using Old Dockers... "
-          docker-compose down
+          echo " Stoping The Old Containers... "
+          # Thử tắt bằng lệnh mới, nếu không được thì bỏ qua (|| true) để tránh lỗi lần đầu chưa có gì để tắt
+          docker-compose down || docker compose down || true
 
-          echo " Building and Starting New Services... "
+          echo " Building and Starting The New Services... "
           # Lệnh này sẽ tự động đọc file docker-compose.yml và dựng cả 5 service
           docker-compose up -d --build
 
