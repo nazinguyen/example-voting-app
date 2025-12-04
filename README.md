@@ -87,8 +87,3 @@ docker compose up -d
 # Result: http://localhost:8081
 # Grafana: http://localhost:3000
 ```
-
----
-
-Author
-Vinh Nguyen Aspiring DevOps / DevSecOps Engineer Passionate about Automation, Cloud Security, and building resilient systems.
