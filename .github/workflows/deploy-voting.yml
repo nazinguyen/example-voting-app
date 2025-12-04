@@ -1,0 +1,43 @@
+name: Deploy Voting App to DigitalOcean
+
+on: 
+ push:
+  branches: [ "main", "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Copy toàn bộ code dự án lên Server (Trừ thư mục .git)
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        source: "."
+        target: "/root/example-voting-app"
+
+    # SSH vào server và chạy lệnh Docker Compose
+    - name: Remote Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          cd "/root/example-voting-app"
+
+          echo " Using Old Dockers... "
+          docker-compose down
+
+          echo " Building and Starting New Services... "
+          # Lệnh này sẽ tự động đọc file docker-compose.yml và dựng cả 5 service
+          docker-compose up -d --build
+
+          echo " Deployed Success! --> The System is already! "
+          docker ps
+
