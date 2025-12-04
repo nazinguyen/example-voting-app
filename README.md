@@ -1,65 +1,94 @@
-# Example Voting App
+# Polyglot Microservices Orchestration & Automated Operations Platform
 
-A simple distributed application running across multiple Docker containers.
+![CI/CD Status](https://img.shields.io/github/actions/workflow/status/nazinguyen/example-voting-app/deploy-voting.yml?label=Build%20%26%20Deploy&logo=github-actions)
+![Docker](https://img.shields.io/badge/Containerization-Docker-blue?logo=docker)
+![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus%20%26%20Grafana-orange?logo=grafana)
+![Alerting](https://img.shields.io/badge/Alerting-Telegram-blue?logo=telegram)
 
-## Getting started
+## Introduction
+This project demonstrates a full-cycle **DevOps implementation** for a microservices architecture application (Python, Node.js, .NET, Redis, PostgreSQL). 
 
-Download [Docker Desktop](https://www.docker.com/products/docker-desktop) for Mac or Windows. [Docker Compose](https://docs.docker.com/compose) will be automatically installed. On Linux, make sure you have the latest version of [Compose](https://docs.docker.com/compose/install/).
-
-This solution uses Python, Node.js, .NET, with Redis for messaging and Postgres for storage.
-
-Run in this directory to build and run the app:
-
-```shell
-docker compose up
-```
-
-The `vote` app will be running at [http://localhost:8080](http://localhost:8080), and the `results` will be at [http://localhost:8081](http://localhost:8081).
-
-Alternately, if you want to run it on a [Docker Swarm](https://docs.docker.com/engine/swarm/), first make sure you have a swarm. If you don't, run:
-
-```shell
-docker swarm init
-```
-
-Once you have your swarm, in this directory run:
-
-```shell
-docker stack deploy --compose-file docker-stack.yml vote
-```
-
-## Run the app in Kubernetes
-
-The folder k8s-specifications contains the YAML specifications of the Voting App's services.
-
-Run the following command to create the deployments and services. Note it will create these resources in your current namespace (`default` if you haven't changed it.)
-
-```shell
-kubectl create -f k8s-specifications/
-```
-
-The `vote` web app is then available on port 31000 on each host of the cluster, the `result` web app is available on port 31001.
-
-To remove them, run:
-
-```shell
-kubectl delete -f k8s-specifications/
-```
+It goes beyond simple deployment by integrating a robust **Automated CI/CD Pipeline**, **Deep Observability (Monitoring)**, and an **Incident Response System (ChatOps)** via Telegram.
 
 ## Architecture
+The system is deployed on **DigitalOcean Cloud** using Docker Compose for orchestration.
 
-![Architecture diagram](architecture.excalidraw.png)
+* **Frontend:** Voting App (Python), Result App (Node.js)
+* **Backend:** Worker (.NET)
+* **Data Layer:** Redis (Queue/Cache), PostgreSQL (Persistent DB)
+* **Operations Stack:** GitHub Actions, Prometheus, Grafana, cAdvisor, Node Exporter.
 
-* A front-end web app in [Python](/vote) which lets you vote between two options
-* A [Redis](https://hub.docker.com/_/redis/) which collects new votes
-* A [.NET](/worker/) worker which consumes votes and stores them in…
-* A [Postgres](https://hub.docker.com/_/postgres/) database backed by a Docker volume
-* A [Node.js](/result) web app which shows the results of the voting in real time
+---
 
-## Notes
+## Key Features Implementation
 
-The voting application only accepts one vote per client browser. It does not register additional votes if a vote has already been submitted from a client.
+### 1. Automated CI/CD Pipeline 
+* **Tool:** GitHub Actions.
+* **Workflow:**
+    * Triggered on `git push` to the `main` branch.
+    * Securely connects to the DigitalOcean Droplet via SSH (using GitHub Secrets).
+    * **Fail-Fast Strategy:** Implemented `set -e` in deployment scripts to halt execution immediately upon any error, preventing partial/corrupt deployments.
+    * **Optimization:** Smart container recreation (only rebuilds changed services).
 
-This isn't an example of a properly architected perfectly designed distributed app... it's just a simple
-example of the various types of pieces and languages you might see (queues, persistent data, etc), and how to
-deal with them in Docker at a basic level.
+### 2. Comprehensive Monitoring & Observability 
+* **Infrastructure Monitoring:** `Node Exporter` tracks Host CPU, RAM, and Disk I/O.
+* **Container Monitoring:** `cAdvisor` provides granular metrics for each specific container (RAM usage of Redis, CPU load of Worker, etc.).
+* **Visualization:** Custom Grafana Dashboards visualizing real-time health of the entire stack.
+
+> **[INSERT YOUR GRAFANA DASHBOARD SCREENSHOT HERE]**
+> *Figure 1: Real-time Dashboard showing Container Health & Resource Usage.*
+
+### 3. SRE & Automated Alerting (ChatOps) 
+* **Goal:** Reduce Mean Time to Detect (MTTD).
+* **Implementation:** * Configured **Prometheus Alert Rules** to detect service downtime (e.g., Redis crash).
+    * Tuned Alert Manager for **High-Frequency Checks (10s interval)**.
+    * Integrated with **Telegram Bot** using custom HTML templates for clean, actionable notifications.
+
+> **[INSERT YOUR TELEGRAM ALERT SCREENSHOT HERE]**
+> *Figure 2: Instant Telegram notification when Redis service was manually stopped (Chaos Engineering test).*
+
+---
+
+## Tech Stack
+
+| Category | Technologies |
+| :--- | :--- |
+| **Cloud Provider** | DigitalOcean (Droplet) |
+| **Containerization** | Docker, Docker Compose (v2) |
+| **CI/CD** | GitHub Actions, Bash Scripting |
+| **Monitoring** | Prometheus, Grafana, cAdvisor, Node Exporter |
+| **Alerting** | Grafana Alert Manager, Telegram Webhook |
+| **OS** | Ubuntu 22.04 LTS |
+
+---
+
+## Chaos Engineering & Incident Response
+To validate the reliability of the system, I performed a simulated failure test:
+
+1.  **Simulation:** Manually stopped the Redis container (`docker stop redis`) to simulate a critical cache failure.
+2.  **Detection:** Prometheus detected the target down within **10 seconds**.
+3.  **Alerting:** Grafana triggered a "Firing" alert to my Telegram.
+4.  **Recovery:** Executed the Incident Playbook to restart the service (`docker start redis`).
+5.  **Resolution:** System recovered, and a "Resolved" notification was sent.
+
+---
+
+## How to Run (Local Dev)
+
+```bash
+# 1. Clone the repo
+git clone [https://github.com/nazinguyen/example-voting-app.git](https://github.com/nazinguyen/example-voting-app.git)
+
+# 2. Start the application
+docker compose up -d
+
+# 3. Access the apps
+# Vote: http://localhost:8080
+# Result: http://localhost:8081
+# Grafana: http://localhost:3000
+```
+
+---
+
+Author
+Vinh Nguyen Aspiring DevOps / DevSecOps Engineer Passionate about Automation, Cloud Security, and building resilient systems.
