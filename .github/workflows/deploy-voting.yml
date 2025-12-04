@@ -35,12 +35,12 @@ jobs:
 
           echo " Stoping The Old Containers... "
           # Thử tắt bằng lệnh mới, nếu không được thì bỏ qua (|| true) để tránh lỗi lần đầu chưa có gì để tắt
-          docker-compose down || docker compose down || true
+          docker-compose down || true
 
           echo " Building and Starting The New Services... "
           # Lệnh này sẽ tự động đọc file docker-compose.yml và dựng cả 5 service
           docker-compose up -d --build
 
           echo " Deployed Success! --> The System is already! "
-          docker ps
+          docker-compose ps
 
